@@ -285,11 +285,15 @@ Map.prototype.loadTimeline = function(){
 Map.prototype.enableScrollEvents = function(){
   var self = this;
   //scroll event
-  document.querySelector('body').addEventListener("mousewheel", bindRaf(function (event){
+  var mouseWheelEvent = function (event){
     event.preventDefault();
     var ele = document.getElementById("social-content-parent");
     ele.scrollTop += event.deltaY;
-  },true));
+  };
+  
+  document.querySelector('body').addEventListener("mousewheel", bindRaf(mouseWheelEvent,true));
+  document.querySelector('body').addEventListener("DOMMouseScroll", bindRaf(mouseWheelEvent,true));
+  document.querySelector('body').addEventListener("wheel", bindRaf(mouseWheelEvent,true));
 
   var currentPostId = -1;
   var lastPostId = -1;
