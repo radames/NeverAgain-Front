@@ -284,20 +284,19 @@ Map.prototype.loadTimeline = function(){
 
 Map.prototype.enableScrollEvents = function(){
   var self = this;
-  //scroll events
-  var scrollEvent = d3.select(window).on("wheel.zoom", mouseWheelScrool);
-  function mouseWheelScrool(e){
-    d3.event.preventDefault();
+  //scroll event
+  document.querySelector('body').addEventListener("mousewheel", bindRaf(function (event){
+    event.preventDefault();
     var ele = document.getElementById("social-content-parent");
-    ele.scrollTop += d3.event.deltaY;
-  }
+    ele.scrollTop += event.deltaY;
+  },true));
 
   var currentPostId = -1;
   var lastPostId = -1;
   var currentChapterId = -1;
   var lastChapterId = -1;
 
-  document.getElementById("social-content-parent").addEventListener("scroll", function (event) {
+  document.getElementById("social-content-parent").addEventListener("scroll", bindRaf(function (event){
     var box = this;
     var h = box.getBoundingClientRect().height;
 
@@ -365,7 +364,7 @@ Map.prototype.enableScrollEvents = function(){
           }
         }); //loop chapter elemetns
     }); //loop chapters
-  });
+  }, true));
 }
 Map.prototype.isElementOnScreen = function(box, visibleEle, position){
   var visibleElerec = visibleEle.getBoundingClientRect();
@@ -424,4 +423,35 @@ function setTransform(mode, value){
 function replaceClass(ele, oldClass, newClass){
   var s = ele.getAttribute('class');
   ele.setAttribute('class', s.replace(oldClass, newClass));
+}
+
+/**
+ * https://stackoverflow.com/questions/41740082/scroll-events-requestanimationframe-vs-requestidlecallback-vs-passive-event-lis
+ * @param fn {Function}
+ * @param [throttle] {Boolean|undefined}
+ * @return {Function}
+ *
+ * @example
+ * //generate rAFed function
+ * jQuery.fn.addClassRaf = bindRaf(jQuery.fn.addClass);
+ *
+ * //use rAFed function
+ * $('div').addClassRaf('is-stuck');
+ */
+function bindRaf(fn, throttle){
+    var isRunning, that, args;
+
+    var run = function(){
+        isRunning = false;
+        fn.apply(that, args);
+    };
+
+    return function(){
+        that = this;
+        args = arguments;
+        if(isRunning && throttle){return;}
+
+        isRunning = true;
+        requestAnimationFrame(run);
+    };
 }
